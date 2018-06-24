@@ -1,6 +1,5 @@
 package org.pearl
 
-import org.pearl.reflection.propertyValue
 import org.pearl.repo.ParameterizedSql
 
 object Sql {
@@ -11,24 +10,8 @@ object Sql {
   @JvmStatic
   fun insert(changeset: Changeset<*>): ParameterizedSql =
     Pair("INSERT INTO ${ident(changeset.record.tableName)} " +
-      "(${changeset.changes.keys.joinToString(", ", transform = ::ident)}) " +
+      "(${changeset.changes.keys.joinToString(", ", transform = Sql::ident)}) " +
       "VALUES (${Array(changeset.changes.size, { "?" }).joinToString(", ")}) RETURNING *", changeset.changes.values.toList())
-
-  inline fun <reified T : Model> update(changeset: Changeset<T>) =
-    changeset.record.schema.entries
-      .find { (_, col) -> col.isPrimaryKey }
-      ?.let { (key, _) -> Sql.update(Pair(key, changeset.record.propertyValue(key)!!), changeset) }
-      ?: throw IllegalArgumentException("The model associated with the changeset has no primary key column.")
-
-  @JvmStatic
-  fun update(primaryKey: Pair<String, Any>, changeset: Changeset<*>): ParameterizedSql {
-    val (keyColumn, keyValue) = primaryKey
-
-    return Pair("UPDATE ${ident(changeset.record.tableName)} SET " +
-      changeset.changes.keys.joinToString(", ") { "${ident(it)} = ?" } + ' ' +
-      "WHERE ${ident(keyColumn)} = ? RETURNING *",
-      changeset.changes.values + keyValue)
-  }
 
   @JvmStatic
   private fun tableColumns(model: Model) =
@@ -42,5 +25,5 @@ object Sql {
     }
 
   @JvmStatic
-  private fun ident(unescapedName: String) = '"' + unescapedName.replace("\"", "\\\"") + '"'
+  fun ident(unescapedName: String) = '"' + unescapedName.replace("\"", "\\\"") + '"'
 }

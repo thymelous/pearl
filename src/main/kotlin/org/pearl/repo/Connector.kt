@@ -12,7 +12,7 @@ object Connector {
     Class.forName("org.postgresql.Driver")
   }
 
-  fun connectToUrl(host: String, port: Int, dbname: String, username: String, password: String) {
+  fun connect(host: String, port: Int, dbname: String, username: String, password: String) {
     connection = DriverManager.getConnection("jdbc:postgresql://$host:$port/$dbname", username, password)
   }
 

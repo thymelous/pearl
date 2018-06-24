@@ -15,7 +15,7 @@ class SelectQueryTest {
   fun `should convert predicates to SQL, keeping bound variables`() {
     val date = LocalDateTime.now()
     val (sql, bindings) = from<TestModel>()
-      .where { ((it["id"] lt 10) and (it["name"] eq "'quotes\"")) or (it["date"] notEq date) }.toParameterizedSql()
+      .where { ((it["id"] lt 10) and (it["name"] eq "'quotes\"")) or (it["date"] notEq date) }.toSql()
 
     assertEquals("""SELECT * FROM "TestModel" WHERE (("TestModel"."id" < ? AND "TestModel"."name" = ?) OR "TestModel"."date" != ?)""", sql)
     assertEquals(listOf(10, "'quotes\"", date), bindings)
@@ -24,7 +24,7 @@ class SelectQueryTest {
   @Test
   fun `should produce correct SQL for negated predicates`() {
     val (sql, bindings) = from<TestModel>()
-      .where { not((it["id"] lt 10) and (it["name"] eq "fff") or not(it["id"] notEq 10)) }.toParameterizedSql()
+      .where { not((it["id"] lt 10) and (it["name"] eq "fff") or not(it["id"] notEq 10)) }.toSql()
 
     assertEquals("""SELECT * FROM "TestModel" WHERE NOT (("TestModel"."id" < ? AND "TestModel"."name" = ?) OR NOT "TestModel"."id" != ?)""", sql)
     assertEquals(listOf(10, "fff", 10), bindings)
@@ -33,7 +33,7 @@ class SelectQueryTest {
   @Test
   fun `should support IS NULL, IS NOT NULL matches`() {
     val (sql, bindings) = from<TestModel>()
-      .where { it["name"].isNull() and it["enum"].isNotNull() }.toParameterizedSql()
+      .where { it["name"].isNull() and it["enum"].isNotNull() }.toSql()
 
     assertEquals("""SELECT * FROM "TestModel" WHERE ("TestModel"."name" IS NULL AND "TestModel"."enum" IS NOT NULL)""", sql)
     assertEquals(emptyList(), bindings)
@@ -43,7 +43,7 @@ class SelectQueryTest {
   fun `should transform nested queries to valid SQL code`() {
     val date = LocalDateTime.now()
     val (sql, bindings) = from<TestModel>()
-      .where { (it["date"] notEq date) and (it["id"] `in` from<Product>().where { it["id"] gt 7 }.select("testId")) and (it["name"] eq "f") }.toParameterizedSql()
+      .where { (it["date"] notEq date) and (it["id"] `in` from<Product>().where { it["id"] gt 7 }.select("testId")) and (it["name"] eq "f") }.toSql()
 
     assertEquals(
       """SELECT * FROM "TestModel" WHERE (("TestModel"."date" != ? AND "TestModel"."id" IN (SELECT "Product"."testId" FROM "Product" WHERE "Product"."id" > ?)) AND "TestModel"."name" = ?)""",
@@ -54,7 +54,7 @@ class SelectQueryTest {
   @Test
   fun `should support matching on enums`() {
     val (sql, bindings) = from<TestModel>()
-      .where { it["enum"] eq TestModel.TestEnum.T1 }.toParameterizedSql()
+      .where { it["enum"] eq TestModel.TestEnum.T1 }.toSql()
 
     assertEquals("""SELECT * FROM "TestModel" WHERE "TestModel"."enum" = ?""", sql)
     assertEquals(listOf(TestModel.TestEnum.T1), bindings)

@@ -18,7 +18,7 @@ sealed class WherePredicate {
     fun isNotNull() = WherePredicate.UnaryMatch(IS_NOT_NULL, table, column)
   }
 
-  abstract val bindings: List<Any>
+  abstract val bindings: List<Any?>
 
   infix fun or(right: WherePredicate) = Binary(OR, this, right)
   infix fun and(right: WherePredicate) = Binary(AND, this, right)
@@ -67,11 +67,11 @@ sealed class WherePredicate {
     }
 
     override val bindings = when (value) {
-      is SelectQuery<*> -> value.toParameterizedSql().second
+      is SelectQuery<*> -> value.toSql().second
       else -> listOf(value)
     }
 
     override fun toString() = "\"$table\".\"$column\" $op " +
-      (if (value is SelectQuery<*>) "(" + value.toParameterizedSql().first + ")" else "?")
+      (if (value is SelectQuery<*>) "(" + value.toSql().first + ")" else "?")
   }
 }

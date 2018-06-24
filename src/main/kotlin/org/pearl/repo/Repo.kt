@@ -3,6 +3,7 @@ package org.pearl.repo
 import org.pearl.Changeset
 import org.pearl.Model
 import org.pearl.Sql
+import org.pearl.query.Query
 import org.pearl.query.SelectQuery
 import org.pearl.reflection.enumByValue
 import org.pearl.reflection.java
@@ -22,26 +23,44 @@ const val ENUM_TAG = "-ENUM-"
 object Repo {
   private val memoizedConstructorFields: MutableMap<QualifiedClassName, NameTypeMap> = mutableMapOf()
 
-  fun connectToUrl(host: String, port: Int, dbname: String, username: String, password: String) =
-    Connector.connectToUrl(host, port, dbname, username, password)
+  fun connect(host: String, port: Int, dbname: String, username: String, password: String) =
+    Connector.connect(host, port, dbname, username, password)
 
-  inline fun <reified T : Model> fetchMany(query: SelectQuery<T>): List<T> =
-    withPrepared(query.toParameterizedSql()) { instantiateMany(it.executeQuery()) }
+  inline fun <reified T : Model> one(query: Query<T>): T =
+    withPrepared(query.toSql(returning = true)) {
+      val results = it.executeQuery()
+      results.next()
+      instantiateOne(results)
+    }
+
+  inline fun <reified T : Model> many(query: Query<T>): List<T> =
+    withPrepared(query.toSql(returning = true)) { instantiateMany(it.executeQuery()) }
+
+  inline fun <reified T : Model> rows(query: SelectQuery<T>): List<List<Any>> =
+    withPrepared(query.toSql(returning = true)) {
+      val results = it.executeQuery()
+      mutableListOf<List<Any>>().apply {
+        while (results.next()) {
+          add(mutableListOf<Any>().apply {
+            query.selectList!!.forEach { add(results.getObject(it)) }
+          })
+        }
+      }
+    }
+
+  fun <T : Model> execute(query: Query<T>): Unit =
+    withPrepared(query.toSql(returning = false)) { it.executeUpdate() }
+
+  inline fun <reified T : Model> instantiateOne(results: ResultSet): T =
+    T::class.primaryConstructor!!.call(*constructorParams(results, T::class))
 
   inline fun <reified T : Model> instantiateMany(results: ResultSet): List<T> =
     mutableListOf<T>().apply {
-      while(results.next()) {
-        T::class.primaryConstructor
-          ?.call(*constructorParams(results, T::class))
-          ?.let(::add)
-      }
+      while (results.next()) add(instantiateOne(results))
     }
 
   inline fun <reified T : Model> insert(changeset: Changeset<T>): T =
     withPrepared(Sql.insert(changeset)) { instantiateMany<T>(it.executeQuery()).first() }
-
-  inline fun <reified T : Model> update(changeset: Changeset<T>): T =
-    withPrepared(Sql.update(changeset)) { instantiateMany<T>(it.executeQuery()).first() }
 
   fun rawSqlUpdate(sql: String) =
     withStatement { it.executeUpdate(sql) }
