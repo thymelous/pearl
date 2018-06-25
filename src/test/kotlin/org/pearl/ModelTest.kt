@@ -1,9 +1,8 @@
 package org.pearl
 
+import TestModel
 import kotlin.test.Test
 import kotlin.test.assertEquals
-
-import TestModel
 
 class ModelTest {
   class TestModelNameOverride: Model() {

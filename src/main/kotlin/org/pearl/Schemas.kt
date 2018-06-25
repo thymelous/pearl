@@ -1,16 +1,16 @@
 package org.pearl
 
+import org.pearl.Schemas.Column.SqlType.EnumStringified
+import org.pearl.Schemas.Column.SqlType.Primitive
+import org.pearl.Schemas.Column.SqlType.Primitive.PrimitiveMapping.*
 import org.pearl.reflection.hasAnnotation
 import org.pearl.reflection.java
 import org.pearl.reflection.javaName
+import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.declaredMemberProperties
-import org.pearl.Schemas.Column.SqlType.Primitive
-import org.pearl.Schemas.Column.SqlType.EnumStringified
-import org.pearl.Schemas.Column.SqlType.Primitive.PrimitiveMapping.*
-import java.time.LocalDateTime
-import java.time.ZonedDateTime
 
 typealias Schema = Map<String, Schemas.Column>
 

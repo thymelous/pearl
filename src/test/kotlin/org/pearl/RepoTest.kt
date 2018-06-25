@@ -1,11 +1,10 @@
 package org.pearl
 
-import kotlin.test.Test
-
 import TestModel
 import org.pearl.query.*
 import org.pearl.repo.Repo
 import kotlin.test.BeforeTest
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class RepoTest {

@@ -1,12 +1,11 @@
 package org.pearl
 
-import kotlin.test.Test
-import kotlin.test.assertEquals
-
 import TestModel
 import org.pearl.query.from
 import org.pearl.query.updateAll
 import org.pearl.query.updateRecord
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class UpdateQueryTest {
   @Test

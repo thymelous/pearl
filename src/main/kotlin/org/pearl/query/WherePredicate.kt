@@ -1,8 +1,10 @@
 package org.pearl.query
 
-import org.pearl.query.WherePredicate.Binary.BinaryOp.*
+import org.pearl.query.WherePredicate.Binary.BinaryOp.AND
+import org.pearl.query.WherePredicate.Binary.BinaryOp.OR
 import org.pearl.query.WherePredicate.BinaryMatch.MatchOp.*
-import org.pearl.query.WherePredicate.UnaryMatch.UnaryMatchOp.*
+import org.pearl.query.WherePredicate.UnaryMatch.UnaryMatchOp.IS_NOT_NULL
+import org.pearl.query.WherePredicate.UnaryMatch.UnaryMatchOp.IS_NULL
 
 fun not(operand: WherePredicate) = WherePredicate.Unary(WherePredicate.Unary.UnaryOp.NOT, operand)
 

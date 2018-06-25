@@ -1,12 +1,11 @@
 package org.pearl
 
-import kotlin.test.Test
-import kotlin.test.assertEquals
-
 import TestModel
 import org.pearl.query.from
 import org.pearl.query.not
 import java.time.LocalDateTime
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class SelectQueryTest {
   data class Product(val id: Int = 0, val testId: Int = 0) : Model()

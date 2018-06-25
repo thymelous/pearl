@@ -10,7 +10,7 @@ import org.pearl.reflection.java
 import org.pearl.reflection.javaName
 import org.pearl.repo.Connector.withPrepared
 import org.pearl.repo.Connector.withStatement
-import java.sql.*
+import java.sql.ResultSet
 import kotlin.reflect.KClass
 import kotlin.reflect.full.primaryConstructor
 

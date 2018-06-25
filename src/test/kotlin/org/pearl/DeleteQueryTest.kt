@@ -1,10 +1,11 @@
 package org.pearl
 
+import TestModel
+import org.pearl.query.delete
+import org.pearl.query.deleteRecord
+import org.pearl.query.from
 import kotlin.test.Test
 import kotlin.test.assertEquals
-
-import TestModel
-import org.pearl.query.*
 
 class DeleteQueryTest {
   @Test

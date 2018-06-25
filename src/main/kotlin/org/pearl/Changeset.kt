@@ -1,12 +1,12 @@
 package org.pearl
 
-import kotlin.reflect.full.createInstance
-import org.pearl.Schemas.Column.SqlType.Primitive
-import org.pearl.Schemas.Column.SqlType.Primitive.PrimitiveMapping.*
 import org.pearl.Schemas.Column.SqlType.EnumStringified
+import org.pearl.Schemas.Column.SqlType.Primitive
+import org.pearl.Schemas.Column.SqlType.Primitive.PrimitiveMapping.STRING
 import org.pearl.reflection.hasAnnotation
 import org.pearl.reflection.property
 import org.pearl.reflection.propertyValue
+import kotlin.reflect.full.createInstance
 
 data class Changeset<T : Model>(val record: T, val changes: Map<String, Any?>, val errors: List<String>) {
   companion object {

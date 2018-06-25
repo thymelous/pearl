@@ -2,13 +2,10 @@ package org.pearl
 
 import Consts.defaultDate
 import Consts.defaultZonedDate
-import kotlin.test.Test
-import kotlin.test.assertEquals
-
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
-
-import org.pearl.SqlTest.SqlTestModel.SampleEnum.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class SqlTest {
   data class SqlTestModel(
