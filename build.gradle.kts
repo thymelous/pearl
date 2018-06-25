@@ -17,6 +17,7 @@ buildscript {
 apply {
   plugin("kotlin")
   plugin("java-library")
+  plugin("jacoco")
 }
 
 plugins {
@@ -24,6 +25,8 @@ plugins {
   maven
   id("com.github.johnrengelman.shadow") version "2.0.1"
 }
+
+apply(from = "test.gradle")
 
 val kotlin_version: String by extra
 
@@ -34,11 +37,12 @@ repositories {
 dependencies {
   compile(kotlinModule("stdlib-jdk8", kotlin_version))
   compile("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
-  compile("org.jetbrains.kotlin:kotlin-test:$kotlin_version")
-  compile("org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlin_version")
-  compile("org.jetbrains.kotlin:kotlin-test-junit5:$kotlin_version")
   compile("org.postgresql:postgresql:42.2.2")
-  testCompile("org.mockito:mockito-core:2.15.0")
+
+  testCompile("org.jetbrains.kotlin:kotlin-test:$kotlin_version")
+  testCompile("org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlin_version")
+  testCompile("org.jetbrains.kotlin:kotlin-test-junit5:$kotlin_version")
+  testCompile("org.junit.jupiter:junit-jupiter-engine:5.2.0")
 }
 
 val shadowJar: ShadowJar by tasks
@@ -49,6 +53,11 @@ shadowJar.apply {
 configure<JavaPluginConvention> {
   sourceCompatibility = JavaVersion.VERSION_1_8
 }
+
 tasks.withType<KotlinCompile> {
   kotlinOptions.jvmTarget = "1.8"
+}
+
+tasks.withType<Test> {
+  useJUnitPlatform()
 }

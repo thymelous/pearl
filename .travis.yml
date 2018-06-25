@@ -1,0 +1,16 @@
+dist: trusty
+sudo: false
+
+jdk: openjdk8
+
+language: java
+
+addons:
+  postgresql: "9.6"
+
+before_script:
+  - psql -c "create role pearl with login password 'pearl';" -U postgres
+  - psql -c 'create database pearl;' -U pearl
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
