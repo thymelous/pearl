@@ -61,9 +61,9 @@ inserted.id
 Individual updates are handled similarly:
 ```kotlin
 val paramChangest = Changeset.update(record, mapOf("size" to "LARGE"), listOf("size"))
-// Returning updated record
+// Return the updated record, including changes that were made by e.g. a database trigger
 val updated = Repo.one(updateRecord(paramChangest))
-// Just updating
+// Just perform the update, don't return anything
 Repo.execute(updateRecord(paramChangest))
 ```
 
@@ -86,12 +86,22 @@ val records = Repo.many(from<Image>().where { it["size"] eq Enum.LARGE })
 val projected = Repo.rows(from<Image>().where { (it["width"] lt 200) and (it["height"] gt 100) }.select("id", "size"))
 ```
 
-A nifty feature is the support for predicates when updating and deleting data:
+A nifty feature you can use is conditional data manipulation:
 ```kotlin
+// Insert an image if there are none in the database
+var record = Repo.one(insert(Changeset.newRecord(Image())).where { not(exists(from<Image>())) })
+record == null
+// => false
+record = Repo.one(insert(Changeset.newRecord(Image())).where { not(exists(from<Image>())) })
+record == null
+// => true
+
 // Set "hasPreview" to true for all records with "size" = LARGE or "width" more than 800
 Repo.execute(updateAll(Changeset.update(Image(), Image(hasPreview = true))).where { (it["size"] eq Enum.LARGE) or (it["width"] gt 800) })
+
 // Delete all images disliked by at least one administrator and return them
 val removedRecords = Repo.many(delete<Image>().where { it["dislikedByUser"] `in` from<User>().select("name").where { it["role"] eq "admin" })
+
 // Only delete the record if its "size" is null or "deletedOn' is not null
 Repo.execute(deleteRecord(record).where { it["size"].isNull() or it["deletedOn"].isNotNull() })
 ``` 
