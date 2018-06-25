@@ -6,6 +6,7 @@ import org.pearl.repo.Repo
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 class RepoTest {
   @BeforeTest
@@ -18,9 +19,9 @@ class RepoTest {
 
   @Test
   fun `should insert new records`() {
-    assertEquals(1, Repo.insert(Changeset.newRecord<TestModel>(
-      mapOf("name" to "aaa", "size" to "100", "enum" to "T2"), listOf("name", "size", "enum"))).id)
-    assertEquals(2, Repo.insert(Changeset.newRecord(TestModel(name = "bbb", size = 120, enum = TestModel.TestEnum.T3))).id)
+    assertEquals(1, Repo.one(insert(Changeset.newRecord<TestModel>(
+      mapOf("name" to "aaa", "size" to "100", "enum" to "T2"), listOf("name", "size", "enum"))))?.id)
+    assertEquals(2, Repo.one(insert(Changeset.newRecord(TestModel(name = "bbb", size = 120, enum = TestModel.TestEnum.T3))))?.id)
 
     assertEquals(listOf(1, 2), Repo.many(from<TestModel>().where { it["size"] lt 200 }).map { it.id })
     assertEquals(listOf(1), Repo.many(from<TestModel>().where { it["name"] eq "aaa" }).map { it.id })
@@ -28,19 +29,23 @@ class RepoTest {
 
     /* Individual selects */
     assertEquals("[[1, T2], [2, T3]]", Repo.rows(from<TestModel>().select("id", "enum")).toString())
+
+    /* Conditional inserts */
+    assertNull(Repo.one(insert(Changeset.newRecord(TestModel())).where { not(exists(from<TestModel>())) }))
+    assertEquals(3, Repo.one(insert(Changeset.newRecord(TestModel())).where { not(exists(from<TestModel>().where { it["name"] eq "defnothere" })) })?.id)
   }
 
   @Test
   fun `should update existing records`() {
-    val record = Repo.insert(Changeset.newRecord<TestModel>(
-      mapOf("name" to "aaa", "size" to "100", "enum" to "T2"), listOf("name", "size", "enum")))
+    val record = Repo.one(insert(Changeset.newRecord<TestModel>(
+      mapOf("name" to "aaa", "size" to "100", "enum" to "T2"), listOf("name", "size", "enum"))))!!
     var changeset = Changeset.update(record, mapOf("enum" to "T3", "size" to "300"), listOf("size"))
-    val updated = Repo.one(updateRecord(changeset))
+    val updated = Repo.one(updateRecord(changeset))!!
 
     assertEquals(record.let { (id, name, date, _, enum) -> TestModel(id, name, date, size = 300, enum = enum) }, updated)
 
-    Repo.insert(Changeset.newRecord(TestModel(name = "bbb", size = 200)))
-    Repo.insert(Changeset.newRecord(TestModel(name = "ccc", size = 300)))
+    Repo.execute(insert(Changeset.newRecord(TestModel(name = "bbb", size = 200))))
+    Repo.execute(insert(Changeset.newRecord(TestModel(name = "ccc", size = 300))))
 
     changeset = Changeset.update(TestModel(), mapOf("size" to "100"), listOf("size"))
     val updatedRecords = Repo.many(updateAll(changeset))
@@ -58,13 +63,9 @@ class RepoTest {
 
   @Test
   fun `should remove records`() {
-    Repo.insert(Changeset.newRecord(TestModel(name = "hey")))
-    Repo.insert(Changeset.newRecord(TestModel(name = "you")))
-    Repo.insert(Changeset.newRecord(TestModel(name = "out")))
-    Repo.insert(Changeset.newRecord(TestModel(name = "there")))
-    Repo.insert(Changeset.newRecord(TestModel(name = "in")))
-    Repo.insert(Changeset.newRecord(TestModel(name = "the")))
-    Repo.insert(Changeset.newRecord(TestModel(name = "cold")))
+    listOf("hey", "you", "out", "there", "in", "the", "cold").forEach {
+      Repo.execute(insert(Changeset.newRecord(TestModel(name = it))))
+    }
 
     val deleted = Repo.many(delete<TestModel>().where { it["name"] gt "s" })
     assertEquals(listOf(2, 4, 6), deleted.map { it.id })

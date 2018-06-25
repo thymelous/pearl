@@ -26,11 +26,10 @@ object Repo {
   fun connect(host: String, port: Int, dbname: String, username: String, password: String) =
     Connector.connect(host, port, dbname, username, password)
 
-  inline fun <reified T : Model> one(query: Query<T>): T =
+  inline fun <reified T : Model> one(query: Query<T>): T? =
     withPrepared(query.toSql(returning = true)) {
       val results = it.executeQuery()
-      results.next()
-      instantiateOne(results)
+      if (results.next()) instantiateOne(results) else null
     }
 
   inline fun <reified T : Model> many(query: Query<T>): List<T> =
@@ -51,6 +50,8 @@ object Repo {
   fun <T : Model> execute(query: Query<T>): Unit =
     withPrepared(query.toSql(returning = false)) { it.executeUpdate() }
 
+  /* Private API (inline functions have public access modifiers because they're used in other inline functions) */
+
   inline fun <reified T : Model> instantiateOne(results: ResultSet): T =
     T::class.primaryConstructor!!.call(*constructorParams(results, T::class))
 
@@ -58,9 +59,6 @@ object Repo {
     mutableListOf<T>().apply {
       while (results.next()) add(instantiateOne(results))
     }
-
-  inline fun <reified T : Model> insert(changeset: Changeset<T>): T =
-    withPrepared(Sql.insert(changeset)) { instantiateMany<T>(it.executeQuery()).first() }
 
   fun rawSqlUpdate(sql: String) =
     withStatement { it.executeUpdate(sql) }

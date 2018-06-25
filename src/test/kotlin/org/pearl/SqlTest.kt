@@ -30,16 +30,4 @@ class SqlTest {
       | "zonedDate" timestampz NOT NULL)""".trimMargin().replace("\n", ""),
       Sql.tableDefinition(SqlTestModel()))
   }
-
-  @Test
-  fun `should generate parameterized INSERTs from changesets`() {
-    val changeset = Changeset.newRecord<SqlTestModel>(
-      params = mapOf("double" to "1.0", "enum" to "VAL2", "name" to "hey"),
-      allowedParams = listOf("double", "enum", "name")
-    )
-    val (sql, bindings) = Sql.insert(changeset)
-
-    assertEquals("""INSERT INTO "SqlTestModel" ("date", "double", "enum", "name", "zonedDate") VALUES (?, ?, ?, ?, ?) RETURNING *""", sql)
-    assertEquals(listOf(defaultDate, 1.0, SqlTestModel.SampleEnum.VAL2, "hey", defaultZonedDate), bindings)
-  }
 }

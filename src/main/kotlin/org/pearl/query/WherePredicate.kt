@@ -6,6 +6,7 @@ import org.pearl.query.WherePredicate.BinaryMatch.MatchOp.*
 import org.pearl.query.WherePredicate.UnaryMatch.UnaryMatchOp.IS_NOT_NULL
 import org.pearl.query.WherePredicate.UnaryMatch.UnaryMatchOp.IS_NULL
 
+fun exists(query: SelectQuery<*>) = WherePredicate.Exists(query)
 fun not(operand: WherePredicate) = WherePredicate.Unary(WherePredicate.Unary.UnaryOp.NOT, operand)
 
 sealed class WherePredicate {
@@ -75,5 +76,11 @@ sealed class WherePredicate {
 
     override fun toString() = "\"$table\".\"$column\" $op " +
       (if (value is SelectQuery<*>) "(" + value.toSql().first + ")" else "?")
+  }
+
+  data class Exists(val query: SelectQuery<*>): WherePredicate() {
+    override val bindings = query.toSql().second
+
+    override fun toString() = "EXISTS (${query.toSql().first})"
   }
 }
