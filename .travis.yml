@@ -10,7 +10,7 @@ addons:
 
 before_script:
   - psql -c "create role pearl with login password 'pearl';" -U postgres
-  - psql -c 'create database pearl;' -U pearl
+  - psql -c "create database pearl;" -U postgres
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
