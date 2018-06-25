@@ -21,8 +21,7 @@ class RepoTest {
   fun `should insert new records`() {
     assertEquals(1, Repo.insert(Changeset.newRecord<TestModel>(
       mapOf("name" to "aaa", "size" to "100", "enum" to "T2"), listOf("name", "size", "enum"))).id)
-    assertEquals(2, Repo.insert(Changeset.newRecord<TestModel>(
-      mapOf("name" to "bbb", "size" to "120", "enum" to "T3"), listOf("name", "size", "enum"))).id)
+    assertEquals(2, Repo.insert(Changeset.newRecord(TestModel(name = "bbb", size = 120, enum = TestModel.TestEnum.T3))).id)
 
     assertEquals(listOf(1, 2), Repo.many(from<TestModel>().where { it["size"] lt 200 }).map { it.id })
     assertEquals(listOf(1), Repo.many(from<TestModel>().where { it["name"] eq "aaa" }).map { it.id })
@@ -41,8 +40,8 @@ class RepoTest {
 
     assertEquals(record.let { (id, name, date, _, enum) -> TestModel(id, name, date, size = 300, enum = enum) }, updated)
 
-    Repo.insert(Changeset.newRecord<TestModel>(mapOf("name" to "bbb", "size" to "200"), listOf("name", "size")))
-    Repo.insert(Changeset.newRecord<TestModel>(mapOf("name" to "ccc", "size" to "300"), listOf("name", "size")))
+    Repo.insert(Changeset.newRecord(TestModel(name = "bbb", size = 200)))
+    Repo.insert(Changeset.newRecord(TestModel(name = "ccc", size = 300)))
 
     changeset = Changeset.update(TestModel(), mapOf("size" to "100"), listOf("size"))
     val updatedRecords = Repo.many(updateAll(changeset))
@@ -52,17 +51,21 @@ class RepoTest {
     Repo.execute(updateAll(Changeset.update(TestModel(), mapOf("enum" to "T3"), listOf("enum"))))
 
     assertEquals(listOf(1, 2, 3), Repo.many(from<TestModel>().where { it["enum"] eq TestModel.TestEnum.T3 }).map { it.id })
+
+    Repo.execute(updateAll(Changeset.update(TestModel(), TestModel(size = 1))))
+
+    assertEquals(listOf(1, 2, 3), Repo.many(from<TestModel>().where { it["size"] eq 1 }).map { it.id })
   }
 
   @Test
   fun `should remove records`() {
-    Repo.insert(Changeset.newRecord<TestModel>(mapOf("name" to "hey"), listOf("name")))
-    Repo.insert(Changeset.newRecord<TestModel>(mapOf("name" to "you"), listOf("name")))
-    Repo.insert(Changeset.newRecord<TestModel>(mapOf("name" to "out"), listOf("name")))
-    Repo.insert(Changeset.newRecord<TestModel>(mapOf("name" to "there"), listOf("name")))
-    Repo.insert(Changeset.newRecord<TestModel>(mapOf("name" to "in"), listOf("name")))
-    Repo.insert(Changeset.newRecord<TestModel>(mapOf("name" to "the"), listOf("name")))
-    Repo.insert(Changeset.newRecord<TestModel>(mapOf("name" to "cold"), listOf("name")))
+    Repo.insert(Changeset.newRecord(TestModel(name = "hey")))
+    Repo.insert(Changeset.newRecord(TestModel(name = "you")))
+    Repo.insert(Changeset.newRecord(TestModel(name = "out")))
+    Repo.insert(Changeset.newRecord(TestModel(name = "there")))
+    Repo.insert(Changeset.newRecord(TestModel(name = "in")))
+    Repo.insert(Changeset.newRecord(TestModel(name = "the")))
+    Repo.insert(Changeset.newRecord(TestModel(name = "cold")))
 
     val deleted = Repo.many(delete<TestModel>().where { it["name"] gt "s" })
     assertEquals(listOf(2, 4, 6), deleted.map { it.id })

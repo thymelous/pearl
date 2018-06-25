@@ -12,6 +12,9 @@ fun enumByValue(enumClass: String, value: String) =
     .getMethod("valueOf", String::class.java)
     .invoke(null, value)
 
+inline fun <reified T : Any> T.property(name: String): KProperty1<T, *>? =
+  T::class.declaredMemberProperties.find { it.name == name }
+
 inline fun <reified T : Any> T.propertyValue(name: String): Any? =
   T::class.declaredMemberProperties.find { it.name == name }?.let {
     (it as KProperty1<T, Any?>).get(this)
