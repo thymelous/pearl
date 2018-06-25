@@ -67,12 +67,16 @@ class RepoTest {
       Repo.execute(insert(Changeset.newRecord(TestModel(name = it))))
     }
 
-    val deleted = Repo.many(delete<TestModel>().where { it["name"] gt "s" })
+    var deleted = Repo.many(delete<TestModel>().where { it["name"] gt "s" })
     assertEquals(listOf(2, 4, 6), deleted.map { it.id })
     assertEquals(4, Repo.many(from<TestModel>()).size)
 
     Repo.execute(deleteRecord(TestModel(id = 1)))
     assertEquals(3, Repo.many(from<TestModel>()).size)
+
+    deleted = Repo.many(delete<TestModel>().where {
+      it["id"] `in` from<TestModel>().select("id").orderBy("name", SelectQuery.SortDirection.DESC).limit(1) })
+    assertEquals(listOf(3), deleted.map { it.id })
 
     Repo.execute(delete<TestModel>())
     assertEquals(0, Repo.many(from<TestModel>()).size)

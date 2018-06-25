@@ -1,6 +1,7 @@
 package org.pearl
 
 import TestModel
+import org.pearl.query.SelectQuery
 import org.pearl.query.exists
 import org.pearl.query.from
 import org.pearl.query.not
@@ -36,6 +37,23 @@ class SelectQueryTest {
       .where { it["name"].isNull() and it["enum"].isNotNull() }.toSql()
 
     assertEquals("""SELECT * FROM "TestModel" WHERE ("TestModel"."name" IS NULL AND "TestModel"."enum" IS NOT NULL)""", sql)
+    assertEquals(emptyList(), bindings)
+  }
+
+  @Test
+  fun `should support ORDER BY clauses`() {
+    val (sql, bindings) = from<TestModel>()
+      .where { it["id"] notEq 10 }.orderBy("enum").orderBy("name", SelectQuery.SortDirection.DESC).toSql()
+
+    assertEquals("""SELECT * FROM "TestModel" WHERE "TestModel"."id" != ? ORDER BY "enum" ASC, "name" DESC""", sql)
+    assertEquals(listOf(10), bindings)
+  }
+
+  @Test
+  fun `should support LIMIT clauses`() {
+    val (sql, bindings) = from<TestModel>().orderBy("name").limit(5).toSql()
+
+    assertEquals("""SELECT * FROM "TestModel" ORDER BY "name" ASC LIMIT 5""", sql)
     assertEquals(emptyList(), bindings)
   }
 

@@ -104,4 +104,7 @@ val removedRecords = Repo.many(delete<Image>().where { it["dislikedByUser"] `in`
 
 // Only delete the record if its "size" is null or "deletedOn' is not null
 Repo.execute(deleteRecord(record).where { it["size"].isNull() or it["deletedOn"].isNotNull() })
+
+// Delete two largest by width images
+Repo.execute(delete<Image>().where { it["id"] `in` from<Image>().select("id").orderBy("width", DESC).limit(2) })
 ``` 
