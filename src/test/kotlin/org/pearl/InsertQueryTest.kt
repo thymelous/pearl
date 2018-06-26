@@ -25,7 +25,7 @@ class InsertQueryTest {
     val (sql, bindings) = insert(changeset).where { not(exists(from<TestModel>().where { it["size"] gt 50 })) }.toSql(returning = false)
 
     assertEquals("""INSERT INTO "TestModel" ("date", "enum", "name", "size") """ +
-      """SELECT ?, ?, ?, ? FROM "TestModel" WHERE NOT EXISTS (SELECT * FROM "TestModel" WHERE "TestModel"."size" > ?)""", sql)
+      """SELECT ?, ?, ?, ? FROM "TestModel" WHERE NOT EXISTS (SELECT * FROM "TestModel" WHERE "TestModel"."size" > ?) LIMIT 1""", sql)
     assertEquals(listOf(defaultDate, TestModel.TestEnum.T1, "hey", 30, 50), bindings)
   }
 }

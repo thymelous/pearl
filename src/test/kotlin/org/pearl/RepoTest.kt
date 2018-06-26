@@ -33,6 +33,9 @@ class RepoTest {
     /* Conditional inserts */
     assertNull(Repo.one(insert(Changeset.newRecord(TestModel())).where { not(exists(from<TestModel>())) }))
     assertEquals(3, Repo.one(insert(Changeset.newRecord(TestModel())).where { not(exists(from<TestModel>().where { it["name"] eq "defnothere" })) })?.id)
+
+    /* Conditional inserts where the condition returns more than one row */
+    assertEquals(listOf(4), Repo.many(insert(Changeset.newRecord(TestModel())).where { it["id"] lt 5 }).map { it.id })
   }
 
   @Test

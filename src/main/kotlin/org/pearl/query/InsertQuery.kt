@@ -18,7 +18,7 @@ class InsertQuery<T : Model>(
     val table = Sql.ident(changeset.record.tableName)
     val columns = changeset.changes.keys.joinToString(", ", transform = Sql::ident)
     val valPlaceholders = Array(changeset.changes.size, { "?" }).joinToString(", ")
-    val values = predicate?.let { "SELECT $valPlaceholders FROM $table WHERE $it" } ?: "VALUES ($valPlaceholders)"
+    val values = predicate?.let { "SELECT $valPlaceholders FROM $table WHERE $it LIMIT 1" } ?: "VALUES ($valPlaceholders)"
     val returningClause = if (returning) " RETURNING *" else ""
     val bindings = predicate?.bindings?.let { changeset.changes.values.toList() + it } ?: changeset.changes.values.toList()
 
