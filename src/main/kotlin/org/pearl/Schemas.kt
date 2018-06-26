@@ -26,7 +26,7 @@ object Schemas {
           DOUBLE("double precision", String::toDouble),
           STRING("text", { it }),
           DATETIME("timestamp", LocalDateTime::parse),
-          DATETIME_ZONED("timestampz", ZonedDateTime::parse)
+          DATETIME_ZONED("timestamptz", ZonedDateTime::parse)
         }
 
         override fun toString() = mapping.sqlType

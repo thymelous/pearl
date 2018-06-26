@@ -27,7 +27,7 @@ class SqlTest {
       | "enum" text NOT NULL,
       | "id" serial PRIMARY KEY,
       | "name" text NOT NULL,
-      | "zonedDate" timestampz NOT NULL)""".trimMargin().replace("\n", ""),
+      | "zonedDate" timestamptz NOT NULL)""".trimMargin().replace("\n", ""),
       Sql.tableDefinition(SqlTestModel()))
   }
 }
