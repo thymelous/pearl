@@ -15,6 +15,8 @@ sealed class WherePredicate {
     infix fun notEq(value: Any) = WherePredicate.BinaryMatch(NOT_EQ, table, column, value)
     infix fun lt(value: Any) = WherePredicate.BinaryMatch(LT, table, column, value)
     infix fun gt(value: Any) = WherePredicate.BinaryMatch(GT, table, column, value)
+    infix fun lte(value: Any) = WherePredicate.BinaryMatch(LTE, table, column, value)
+    infix fun gte(value: Any) = WherePredicate.BinaryMatch(GTE, table, column, value)
     infix fun `in`(value: Any) = WherePredicate.BinaryMatch(IN, table, column, value)
 
     fun isNull() = WherePredicate.UnaryMatch(IS_NULL, table, column)

@@ -60,9 +60,9 @@ class SelectQueryTest {
   @Test
   fun `should support EXISTS predicates`() {
     val (sql, bindings) = from<TestModel>()
-      .where { not(it["id"] lt 10) and exists(from<TestModel>().where { it["id"] gt 20 }) }.toSql()
+      .where { not(it["id"] lte 10) and exists(from<TestModel>().where { it["id"] gte 20 }) }.toSql()
 
-    assertEquals("""SELECT * FROM "TestModel" WHERE (NOT "TestModel"."id" < ? AND EXISTS (SELECT * FROM "TestModel" WHERE "TestModel"."id" > ?))""", sql)
+    assertEquals("""SELECT * FROM "TestModel" WHERE (NOT "TestModel"."id" <= ? AND EXISTS (SELECT * FROM "TestModel" WHERE "TestModel"."id" >= ?))""", sql)
     assertEquals(listOf(10, 20), bindings)
   }
 
