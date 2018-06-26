@@ -1,6 +1,7 @@
 package org.pearl
 
 import Consts.defaultDate
+import Consts.defaultZonedDate
 import TestModel
 import org.pearl.query.*
 import kotlin.test.Test
@@ -15,8 +16,8 @@ class InsertQueryTest {
     )
     val (sql, bindings) = insert(changeset).toSql(returning = false)
 
-    assertEquals("""INSERT INTO "TestModel" ("date", "enum", "name", "size") VALUES (?, ?, ?, ?)""", sql)
-    assertEquals(listOf(defaultDate, TestModel.TestEnum.T1, "hey", 30), bindings)
+    assertEquals("""INSERT INTO "TestModel" ("date", "enum", "name", "size", "zonedDate") VALUES (?, ?, ?, ?, ?)""", sql)
+    assertEquals(listOf(defaultDate, TestModel.TestEnum.T1, "hey", 30, defaultZonedDate), bindings)
   }
 
   @Test
@@ -24,8 +25,8 @@ class InsertQueryTest {
     val changeset = Changeset.newRecord(TestModel(name = "hey", size = 30, enum = TestModel.TestEnum.T1))
     val (sql, bindings) = insert(changeset).where { not(exists(from<TestModel>().where { it["size"] gt 50 })) }.toSql(returning = false)
 
-    assertEquals("""INSERT INTO "TestModel" ("date", "enum", "name", "size") """ +
-      """SELECT ?, ?, ?, ? FROM "TestModel" WHERE NOT EXISTS (SELECT * FROM "TestModel" WHERE "TestModel"."size" > ?) LIMIT 1""", sql)
-    assertEquals(listOf(defaultDate, TestModel.TestEnum.T1, "hey", 30, 50), bindings)
+    assertEquals("""INSERT INTO "TestModel" ("date", "enum", "name", "size", "zonedDate") """ +
+      """SELECT ?, ?, ?, ?, ? FROM "TestModel" WHERE NOT EXISTS (SELECT * FROM "TestModel" WHERE "TestModel"."size" > ?) LIMIT 1""", sql)
+    assertEquals(listOf(defaultDate, TestModel.TestEnum.T1, "hey", 30, defaultZonedDate, 50), bindings)
   }
 }

@@ -1,6 +1,5 @@
 package org.pearl.repo
 
-import org.pearl.Changeset
 import org.pearl.Model
 import org.pearl.Sql
 import org.pearl.query.Query
@@ -11,6 +10,10 @@ import org.pearl.reflection.javaName
 import org.pearl.repo.Connector.withPrepared
 import org.pearl.repo.Connector.withStatement
 import java.sql.ResultSet
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
 import kotlin.reflect.KClass
 import kotlin.reflect.full.primaryConstructor
 
@@ -77,6 +80,12 @@ object Repo {
         "boolean", "java.lang.Boolean" -> results.getBoolean(name)
         /* #getObject can't parse the timestamp returned by Postgres, so we do it by hand */
         "java.time.LocalDateTime" -> results.getTimestamp(name).toLocalDateTime()
+        "java.time.ZonedDateTime" -> {
+          val (datetime, offset) = """(.+)([+-]\d\d)$""".toRegex().matchEntire(results.getString(name))!!.destructured
+          val datetimeLocal = LocalDateTime.parse(datetime.replace(" ", "T"))
+          val zoneId = ZoneId.of(offset)
+          ZonedDateTime.ofLocal(datetimeLocal, zoneId, ZoneOffset.of(offset))
+        }
         else ->
           if (type.startsWith(ENUM_TAG)) enumByValue(type.replaceFirst(ENUM_TAG, ""), results.getString(name))
           else results.getObject(name)

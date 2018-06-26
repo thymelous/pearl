@@ -4,6 +4,7 @@ import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.PreparedStatement
 import java.sql.Statement
+import java.time.ZonedDateTime
 
 object Connector {
   var connection: Connection? = null
@@ -22,6 +23,8 @@ object Connector {
       .apply { sqlWithParams.second.forEachIndexed { i, param ->
         /* Enums are stored as strings in the database */
         if (param?.javaClass?.isEnum == true) setString(i + 1, param.toString())
+        else if (param?.javaClass?.typeName == "java.time.ZonedDateTime")
+          setObject(i + 1, (param as ZonedDateTime).toOffsetDateTime())
         else setObject(i + 1, param)
       } }
       .use(block)

@@ -45,7 +45,7 @@ class RepoTest {
     var changeset = Changeset.update(record, mapOf("enum" to "T3", "size" to "300"), listOf("size"))
     val updated = Repo.one(updateRecord(changeset))!!
 
-    assertEquals(record.let { (id, name, date, _, enum) -> TestModel(id, name, date, size = 300, enum = enum) }, updated)
+    assertEquals(record.let { (id, name, date, zoned, _,  enum) -> TestModel(id, name, date, zoned, size = 300, enum = enum) }, updated)
 
     Repo.execute(insert(Changeset.newRecord(TestModel(name = "bbb", size = 200))))
     Repo.execute(insert(Changeset.newRecord(TestModel(name = "ccc", size = 300))))
